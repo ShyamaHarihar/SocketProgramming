@@ -40,10 +40,14 @@ def send_all(conn_socket):
     conn_socket.send(df.to_string().encode(FORMAT))
 
 def calc_diff(conn_socket):
+    df=pd.read_csv('market.csv')
     df['difference'] = df['closingsharevalue'] - df['openingsharevalue']
     df.to_csv("market.csv", index=False)
     conn_socket.send(b"Difference updated successfully")
-
+def modifyfun(conn_socket):
+    df=pd.read_csv('market.csv')
+    df['openingsharevalue']=1000
+    df.to_csv("market.csv",index=False)
 # Method to serve data to client
 def on_new_client(clientsocket,addr,host):
     while True:
@@ -58,6 +62,8 @@ def on_new_client(clientsocket,addr,host):
             send_all(clientsocket)
         elif (args[0]=="2"):
             calc_diff(clientsocket)
+        elif (args[0]=="3"):
+            modifyfun(clientsocket)
     clientsocket.close()
 
 

@@ -8,16 +8,15 @@ IP_ADDR = socket.gethostbyname(HOST)
 SEPARATOR = '<SEPARATOR>'
 FORMAT = 'utf-8'
 CHUNK = 2048
-from datetime import date
-date= '20010202'
+date= '2001.02.02'
 client.connect(ADDR)
-request_options = [-1, 0, 1, 2]
+request_options = [-1, 0, 1, 2,3]
 #2 is for updating difference
 
 while True:
     request = int(
         input(
-            "0: Add new row\n1: View All\n2:Update Difference\nEnter option (-1 to break): "))
+            "0: Insertion of a new row\n1: View all Rows\n2:Update (Difference)\n3:Modification of Opening Stock Value\nEnter option (-1 to break): "))
 
     if request in request_options:
         req_str = str(request)
@@ -29,7 +28,7 @@ while True:
             companyname = input("Enter company name")
             openingsharevalue = (input("Enter opening share value: "))
             closingsharevalue = (input("Enter closing share value: "))
-            #date = str(input("Enter date: (yyyy-mm-dd): "))
+            date=input("Enter date")
             req_str = req_str + SEPARATOR + companyname + SEPARATOR + openingsharevalue + SEPARATOR + closingsharevalue + SEPARATOR + date
         client.send(req_str.encode(FORMAT))
         print('data sent')
