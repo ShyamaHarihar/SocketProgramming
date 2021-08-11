@@ -5,11 +5,11 @@ import pandas as pd
 from csv import writer
 SEPARATOR = "<SEPARATOR>"
 
-cols =  ['companyname', 'openingsharevalue', 'closingsharevalue', 'date']
+cols =  ['movietitle', 'status', 'releasedate', 'revenue','voteaverage']
 df = pd.DataFrame(columns=cols)
 
-if (os.stat("market.csv").st_size != 0):
-    df = pd.read_csv('market.csv')
+if (os.stat("moviedata.csv").st_size != 0):
+    df = pd.read_csv('moviedata.csv')
 
 HOST = socket.gethostname()
 PORT = 1234
@@ -24,47 +24,50 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
 
-def add_row(conn_socket, companyname, openingsharevalue, closingsharevalue,date):
-        openingsharevalue=int(openingsharevalue)
-        closingsharevalue=int(closingsharevalue)
-        newrow = [companyname,openingsharevalue,closingsharevalue,date]
-        with open('market.csv', 'a') as f_object:
+def add_row(conn_socket, movietitle,status,releasedate,revenue,voteaverage):
+        revenue=int(revenue)
+        voteaverage=float(voteaverage)
+        newrow = [movietitle,status,releasedate,revenue,voteaverage]
+        with open('moviedata.csv', 'a') as f_object:
             writer_object = writer(f_object)
             writer_object.writerow(newrow)
             f_object.close()
-        conn_socket.send(b"Added Row Successfully")
+        conn_socket.send(b"Added Row to moviedata.csv Successfully")
 
 
 def send_all(conn_socket):
-    df=pd.read_csv('market.csv')
+    df=pd.read_csv('moviedata.csv')
     conn_socket.send(df.to_string().encode(FORMAT))
 
-def calc_diff(conn_socket):
-    df=pd.read_csv('market.csv')
-    df['difference'] = df['closingsharevalue'] - df['openingsharevalue']
-    df.to_csv("market.csv", index=False)
-    conn_socket.send(b"Difference updated successfully")
-def modifyfun(conn_socket):
-    df=pd.read_csv('market.csv')
-    df['openingsharevalue']=8000
-    df.to_csv("market.csv",index=False)
-    conn_socket.send(b"Modification done")
+
+def view_popular(conn_socket):
+    df=pd.read_csv('moviedata.csv')
+    df1=df.sort_values('voteaverage',ascending=False)
+    conn_socket.send(df1.to_string().encode(FORMAT))
+
+def update_row(conn_socket,new_rating,movie_to_query):
+    df=pd.read_csv('moviedata.csv')
+    df.set_index("movietitle", inplace=True)
+    df.at[movie_to_query, 'voteaverage'] = new_rating
+    df.to_csv('moviedata.csv')
+    conn_socket.send(b"Data updated successfully")
+
 # Method to serve data to client
 def on_new_client(clientsocket,addr,host):
     while True:
         msg = clientsocket.recv(1024).decode()
         args = msg.split(SEPARATOR)
-        print(args)
+        #print(args)
         if (args[0] == "B"):
             break
         elif (args[0] == "I"):
-            add_row(clientsocket, args[1], args[2], args[3], args[4])
+            add_row(clientsocket, args[1], args[2], args[3], args[4],args[5])
         elif (args[0] == "V"):
             send_all(clientsocket)
+        elif (args[0]=="P"):
+            view_popular(clientsocket)
         elif (args[0]=="U"):
-            calc_diff(clientsocket)
-        elif (args[0]=="M"):
-            modifyfun(clientsocket)
+            update_row(clientsocket,args[1],args[2])
     clientsocket.close()
 
 

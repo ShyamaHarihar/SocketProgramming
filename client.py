@@ -10,21 +10,20 @@ FORMAT = 'utf-8'
 CHUNK = 2048
 date= '2001.02.02'
 client.connect(ADDR)
-request_options = [-1, 0, 1, 2,3]
+request_options = ["I", "U", "V", "B", "M"]
 #2 is for updating difference
 
 while True:
-    request = int(
-        input(
-            "0: Insertion of a new row\n1: View all Rows\n2:Update (Difference)\n3:Modification of Opening Stock Value\nEnter option (-1 to break): "))
+    request = input(
+            "I : Insertion of a new row\nV : View all Rows\nU :Update (Difference)\nM :Modification of Opening Stock Value\nEnter option (B to break): ")
 
     if request in request_options:
         req_str = str(request)
 
-        if request == -1:
+        if request == "B":
             print('Client shutting down')
             break
-        elif request == 0:
+        elif request == "I":
             companyname = input("Enter company name")
             openingsharevalue = (input("Enter opening share value: "))
             closingsharevalue = (input("Enter closing share value: "))
